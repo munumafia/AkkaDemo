@@ -48,8 +48,6 @@ namespace InternetRelayChat.Client
                 {
                     chatClient.Tell(new SendUserMessage(currentChannel, input, nick));
                 }
-
-                Console.Write($"<{nick}|{currentChannel}> ");
             }
 
             Console.WriteLine("Terminating...");
