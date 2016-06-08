@@ -53,7 +53,7 @@ namespace InternetRelayChat.Backend.Actors
         /// <summary>
         /// Handles a command to connect to the server
         /// </summary>
-        /// <param name="command">The ConnectToServer command that was sent to the actor</param>
+        /// <param name="command">The ConnectToServer command that needs to be processed</param>
         public void Handle(ConnectToServer command)
         {
             if (!_Users.ContainsKey(command.Nick))
@@ -65,7 +65,7 @@ namespace InternetRelayChat.Backend.Actors
         /// <summary>
         /// Handles a command to join a channel
         /// </summary>
-        /// <param name="command">The JoinChannel command that was sent to the actor</param>
+        /// <param name="command">The JoinChannel command that needs to be processed</param>
         public void Handle(JoinChannel command)
         {
             var user = _Users.TryGetValue(command.Nick);
@@ -103,7 +103,7 @@ namespace InternetRelayChat.Backend.Actors
         /// <summary>
         /// Handles a command to part a channel
         /// </summary>
-        /// <param name="command">The PartChannel command that was sent to the actor</param>
+        /// <param name="command">The PartChannel command that needs to be processed</param>
         public void Handle(PartChannel command)
         {
             var channel = _Channels.TryGetValue(command.Channel);
@@ -126,29 +126,37 @@ namespace InternetRelayChat.Backend.Actors
             channel.Tell(evt);
         }
 
-        public void Handle(SendUserMessage userMessage)
+        /// <summary>
+        /// Handles a command to send a command to a specific channel
+        /// </summary>
+        /// <param name="command">The SendUserMessage command that needs to be processed</param>
+        public void Handle(SendUserMessage command)
         {
-            var channel = _Channels.TryGetValue(userMessage.Channel);
+            var channel = _Channels.TryGetValue(command.Channel);
             if (channel == null)
             {
                 // Need to log warning here
                 return;
             }
 
-            var evt = new UserMessageSent(userMessage.Channel, userMessage.Message, userMessage.Nick);
+            var evt = new UserMessageSent(command.Channel, command.Message, command.Nick);
             channel.Tell(evt);
         }
 
-        public void Handle(QuitServer message)
+        /// <summary>
+        /// Handles a command to quit/disconnect from the server
+        /// </summary>
+        /// <param name="command">The QuitServer command that needs to be processed</param>
+        public void Handle(QuitServer command)
         {
-            var user = _Users.TryGetValue(message.Nick);
+            var user = _Users.TryGetValue(command.Nick);
             if (user == null)
             {
                 // Need to log warning here
                 return;
             }
 
-            var evt = new UserQuit(message.Nick);
+            var evt = new UserQuit(command.Nick);
             foreach (var channel in user.Channels.Values)
             {
                 channel.Tell(evt);
